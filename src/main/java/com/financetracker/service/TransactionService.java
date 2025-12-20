@@ -1,9 +1,11 @@
 package com.financetracker.service;
 
+import com.financetracker.dto.TransactionNotificationRequest;
 import com.financetracker.dto.TransactionRequest;
 import com.financetracker.dto.TransactionResponse;
 import com.financetracker.entity.Transaction;
 import com.financetracker.entity.UserInfo;
+import com.financetracker.publisher.TransactionEventPublisher;
 import com.financetracker.repository.TransactionRepository;
 import com.financetracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,6 +25,8 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TransactionEventPublisher eventPublisher;
 
     private UserInfo getCurrentUser() {
         String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
@@ -45,6 +49,15 @@ public class TransactionService {
         );
 
         Transaction saved = transactionRepository.save(tx);
+        //Adding RabbitMQ related notification service
+        TransactionNotificationRequest notify = new TransactionNotificationRequest();
+        notify.setToEmail(user.getEmail());
+        notify.setAmount(saved.getAmount());
+        notify.setCategory(saved.getCategory().toString());
+        notify.setType(saved.getType().toString());
+
+        eventPublisher.publishTransactionEvent(notify);
+
         return toResponse(saved);
     }
 
