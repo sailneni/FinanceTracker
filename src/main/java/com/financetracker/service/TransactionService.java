@@ -57,6 +57,7 @@ public class TransactionService {
         notify.setType(saved.getType().toString());
 
         eventPublisher.publishTransactionEvent(notify);
+        System.out.println("Event published to RabbitMQ");
 
         return toResponse(saved);
     }

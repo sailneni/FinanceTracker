@@ -16,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +38,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowCredentials(true);
+                    config.setAllowedOrigins(Arrays.asList(
+                            "http://localhost:8080",
+                            "http://localhost:8081",
+                            "https://vue-pearl-eight.vercel.app"
+                    ));
+                    config.addAllowedHeader("*");
+                    config.addAllowedMethod("*");
+                    return config;
+                }))
                 // Disable CSRF (not needed for stateless JWT)
                 .csrf(csrf -> csrf.disable())
 
@@ -58,7 +73,7 @@ public class SecurityConfig {
                         // Role-based endpoints
                         .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
                         .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/auth/transactions/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/auth/transaction/**").hasAuthority("ROLE_USER")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
