@@ -10,11 +10,13 @@ import com.financetracker.repository.TransactionRepository;
 import com.financetracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -114,6 +116,39 @@ public class TransactionService {
 
         transactionRepository.delete(tx);
     }
+
+    public void exportTransactions(OutputStream outputStream) throws IOException {
+        UserInfo user = getCurrentUser();
+        List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        try (PrintWriter writer = new PrintWriter(outputStream)) {
+
+            writer.println("ID,DateTime,Description,Amount,Category,Type");
+
+            for (Transaction tx : transactions) {
+                writer.printf("%d,%s,%s,%.2f,%s,%s%n",
+                        tx.getId(),
+                        tx.getDateTime(),
+                        escapeCsvValue(tx.getDescription()),
+                        tx.getAmount(),
+                        tx.getCategory(),
+                        tx.getType()
+                );
+            }
+            writer.flush();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String escapeCsvValue(String value) {
+        if (value == null) return "";
+        return value.contains(",") || value.contains("\"") || value.contains("\n")
+                ? "\"" + value.replace("\"", "\"\"") + "\""
+                : value;
+    }
+
 
     private TransactionResponse toResponse(Transaction tx) {
         TransactionResponse resp = new TransactionResponse();
