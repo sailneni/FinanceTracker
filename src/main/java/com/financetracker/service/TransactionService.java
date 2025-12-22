@@ -57,7 +57,7 @@ public class TransactionService {
         notify.setType(saved.getType().toString());
 
         eventPublisher.publishTransactionEvent(notify);
-        System.out.println("Event published to RabbitMQ");
+        System.out.println("Event published to Azure Service Bus");
 
         return toResponse(saved);
     }
