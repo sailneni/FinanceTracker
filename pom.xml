@@ -130,6 +130,11 @@
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-servicebus</artifactId>
+			<version>7.17.16</version>
+		</dependency>
 
 	</dependencies>
 
