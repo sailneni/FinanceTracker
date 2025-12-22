@@ -18,7 +18,8 @@ public class CorsConfig {
 
         config.setAllowCredentials(true);
         // Allow your Vue dev server
-        config.setAllowedOrigins(Arrays.asList("http://localhost:8080",
+        config.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:8080",
                 "http://localhost:8081",
                 "https://polite-sea-0957fdb0f.2.azurestaticapps.net"
         ));
