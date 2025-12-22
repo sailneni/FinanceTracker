@@ -41,10 +41,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowCredentials(true);
-                    config.setAllowedOrigins(Arrays.asList(
+                    config.setAllowedOriginPatterns(Arrays.asList(
                             "http://localhost:8080",
                             "http://localhost:8081",
-                            "https://vue-pearl-eight.vercel.app"
+                            "https://vue-pearl-eight.vercel.app",
+                            "https://polite-sea-0957fdb0f.2.azurestaticapps.net"
                     ));
                     config.addAllowedHeader("*");
                     config.addAllowedMethod("*");
