@@ -3,10 +3,13 @@ package com.financetracker.controller;
 import com.financetracker.dto.TransactionRequest;
 import com.financetracker.dto.TransactionResponse;
 import com.financetracker.service.TransactionService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -41,5 +44,17 @@ public class TransactionController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         transactionService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<Void> exportTransactions(HttpServletResponse response) throws IOException {
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition",
+                "attachment; filename=transactions-" + LocalDate.now() + ".csv");
+        response.setCharacterEncoding("UTF-8");
+
+        transactionService.exportTransactions(response.getOutputStream());
+        return ResponseEntity.ok().build();
     }
 }
