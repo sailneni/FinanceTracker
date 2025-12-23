@@ -29,16 +29,18 @@ public class TransactionService {
     private UserRepository userRepository;
     @Autowired
     private TransactionEventPublisher eventPublisher;
+    @Autowired
+    private UserService userService;
 
-    private UserInfo getCurrentUser() {
-        String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-
-        return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found"));
-    }
+//    private UserInfo getCurrentUser() {
+//        String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+//
+//        return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found"));
+//    }
 
     @Transactional
     public TransactionResponse create(TransactionRequest request) {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
 
         Transaction tx = new Transaction();
         tx.setUser(user);
@@ -66,7 +68,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse update(Long id, TransactionRequest request) {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
 
         Transaction tx = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -85,7 +87,7 @@ public class TransactionService {
     }
 
     public TransactionResponse getById(Long id) {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
 
         Transaction tx = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -98,14 +100,14 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> getAllForCurrentUser() {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
         return transactionRepository.findByUser(user)
                 .stream().map(this::toResponse).toList();
     }
 
     @Transactional
     public void delete(Long id) {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
 
         Transaction tx = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -118,7 +120,7 @@ public class TransactionService {
     }
 
     public void exportTransactions(OutputStream outputStream) throws IOException {
-        UserInfo user = getCurrentUser();
+        UserInfo user = userService.getCurrentUser();
         List<Transaction> transactions = transactionRepository.findByUser(user);
 
         try (PrintWriter writer = new PrintWriter(outputStream)) {
