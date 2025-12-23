@@ -75,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
                         .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/auth/transaction/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers("/invoice/**").hasAuthority("ROLE_USER")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()

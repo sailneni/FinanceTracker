@@ -4,6 +4,7 @@ package com.financetracker.service;
 import com.financetracker.entity.UserInfo;
 import com.financetracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,9 +42,22 @@ public class UserService implements UserDetailsService {
         System.out.println("Email: " + userInfo.getEmail());
         System.out.println("Raw password: " + userInfo.getPassword());
         System.out.println("Roles: " + userInfo.getRoles());
-        // Encrypt password before saving
-        userInfo.setPassword(encoder.encode(userInfo.getPassword()));
-        repository.save(userInfo);
-        return "User added successfully!";
+
+        if (repository.findByEmail(userInfo.getEmail()).isPresent()) {
+            return "User already exists!";
+        }
+        else {
+            // Encrypt password before saving
+            userInfo.setPassword(encoder.encode(userInfo.getPassword()));
+            repository.save(userInfo);
+            return "User added successfully!";
+        }
+
+    }
+
+    public UserInfo getCurrentUser() {
+        String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
+        return repository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found"));
     }
 }
